@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absensi Kerja Rian - GPS Lock</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0e0e15;color:#fff;font-family:system-ui;padding:16px}
+.card{max-width:420px;margin:auto;background:#1a1a24;border:1px solid #2a2a3a;border-radius:20px;padding:20px}
+h1{font-size:20px} .sub{color:#9aa0b2;font-size:13px;margin:6px 0 14px}
+.box{padding:12px;border-radius:12px;font-size:13px;margin-bottom:12px;border:1px solid #2a2a3a}
+.ok{border-color:#3dd68c;background:rgba(61,214,140,.1)} .bad{border-color:#ff4d4d;background:rgba(255,77,77,.1)}
+input,button{width:100%;padding:14px;border-radius:12px;margin-bottom:10px;font-size:15px}
+input{background:#101019;border:1px solid #2a2a3a;color:#fff}
+button{border:none;font-weight:700;cursor:pointer}
+.btn-cam{background:#2a2a3a;color:#fff} .btn-utama{background:#3dd68c;color:#000}
+.btn-utama:disabled{background:#2a2a3a;color:#666}
+video,img{width:100%;border-radius:14px;margin-bottom:10px;display:none}
+video{transform:scaleX(-1)} small{color:#9aa0b2;font-size:11px;display:block;text-align:center;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>📸 Absensi Kerja</h1>
+<div class="sub">Rian - Serang - GPS Lock</div>
+<div id="lockInfo" class="box">⏳ Mendeteksi GPS...</div>
+<input id="nama" placeholder="Nama karyawan">
+<button id="btnKamera" class="btn-cam">📷 Buka Kamera</button>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" style="display:none"></canvas>
+<img id="preview">
+<button id="btnFoto" class="btn-cam" style="display:none">📸 Ambil Foto</button>
+<button id="btnUlang" class="btn-cam" style="display:none">🔄 Ulang Foto</button>
+<button id="btnAbsen" class="btn-utama" disabled>Menunggu GPS...</button>
+<small id="status"></small>
+</div>
+<script>
+let stream, foto=null, pos=null, kantor=JSON.parse(localStorage.getItem('kantorLock')||'null')||{lat:-6.1169,lng:106.159,radius:150,locked:false};
+function jarak(a,b,c,d){const R=6371e3,toRad=x=>x*Math.PI/180;const dLa=toRad(c-a),dLo=toRad(d-b);const q=Math.sin(dLa/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(dLo/2)**2;return R*2*Math.atan2(Math.sqrt(q),Math.sqrt(1-q))}
+const lockInfo=document.getElementById('lockInfo'),statusEl=document.getElementById('status'),btnAbsen=document.getElementById('btnAbsen'),video=document.getElementById('video'),canvas=document.getElementById('canvas'),preview=document.getElementById('preview');
+function updateUI(){if(!pos)return;const {latitude,longitude,accuracy}=pos.coords;const j=jarak(latitude,longitude,kantor.lat,kantor.lng);if(!kantor.locked){lockInfo.className='box ok';lockInfo.innerHTML=`🔓 <b>BELUM DIKUNCI</b><br>Posisi ini akan jadi kantor:<br>${latitude.toFixed(6)}, ${longitude.toFixed(6)}<br>Akurasi ±${Math.round(accuracy)}m<br><br><b>Klik absen untuk KUNCI di sini!</b>`;btnAbsen.disabled=false;btnAbsen.textContent='🔒 KUNCI & ABSEN DI SINI';return}const ok=j<=kantor.radius;lockInfo.className='box '+(ok?'ok':'bad');lockInfo.innerHTML=(ok?'✅ DI AREA KANTOR':'❌ DI LUAR KANTOR')+`<br>${Math.round(j)}m dari pusat | ±${Math.round(accuracy)}m<br>Pusat: ${kantor.lat.toFixed(6)}, ${kantor.lng.toFixed(6)}`;btnAbsen.disabled=!(ok&&foto);btnAbsen.textContent=!foto?'📸 Foto dulu':ok?'✅ ABSEN MASUK':'🔒 DI LUAR KANTOR - BLOKIR';}
+navigator.geolocation.watchPosition(p=>{pos=p;if(p.coords.accuracy<100)updateUI();else{lockInfo.textContent=`⏳ GPS kurang akurat ±${Math.round(p.coords.accuracy)}m - keluar ruangan`; }},e=>{lockInfo.className='box bad';lockInfo.textContent='❌ Izinkan GPS! '+e.message},{enableHighAccuracy:true,maximumAge:0});
+document.getElementById('btnKamera').onclick=async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});video.srcObject=stream;video.style.display='block';document.getElementById('btnKamera').style.display='none';document.getElementById('btnFoto').style.display='block';}catch(e){alert(e.message)}};
+document.getElementById('btnFoto').onclick=()=>{canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext('2d').drawImage(video,0,0);foto=canvas.toDataURL('image/jpeg',0.8);preview.src=foto;preview.style.display='block';video.style.display='none';document.getElementById('btnFoto').style.display='none';document.getElementById('btnUlang').style.display='block';stream.getTracks().forEach(t=>t.stop());updateUI();};
+document.getElementById('btnUlang').onclick=()=>{foto=null;preview.style.display='none';document.getElementById('btnUlang').style.display='none';document.getElementById('btnKamera').style.display='block';updateUI();};
+btnAbsen.onclick=()=>{const nama=document.getElementById('nama').value.trim();if(!nama){alert('Isi nama dulu!');return}if(!foto){alert('Foto dulu!');return}if(!kantor.locked){if(!confirm(`Kunci kantor di sini?\n${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}\nRadius ${kantor.radius}m`))return;kantor={lat:pos.coords.latitude,lng:pos.coords.longitude,radius:150,locked:true,lockedBy:nama};localStorage.setItem('kantorLock',JSON.stringify(kantor));alert('🔒 KANTOR TERKUNCI!');}let rekap=JSON.parse(localStorage.getItem('rekapAbsen')||'[]');rekap.unshift({nama,waktu:new Date().toLocaleString('id-ID'),lat:pos.coords.latitude,lng:pos.coords.longitude,jarak:Math.round(jarak(pos.coords.latitude,pos.coords.longitude,kantor.lat,kantor.lng))});localStorage.setItem('rekapAbsen',JSON.stringify(rekap));alert('✅ ABSEN BERHASIL: '+nama);location.reload();};
+</script>
+</body>
+</html>
