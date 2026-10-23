@@ -1,0 +1,16 @@
+{
+  "name": "MDS RIAN - Absensi & Stock",
+  "short_name": "MDS RIAN",
+  "description": "Absensi + Stock Opname Mall - Online 300 User",
+  "start_url": "/absensi-kerja-rian/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#00e676",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063196.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
