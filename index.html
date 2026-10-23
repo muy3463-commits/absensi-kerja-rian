@@ -1,151 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MDS Rian - Absensi & Stock Mall</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>MDS RIAN - Absensi & Stock Mall</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00e676">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-:root{--bg:#080808;--card:#141414;--border:#222;--green:#00e676;--blue:#2196f3;--red:#ff5252}
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system}
-body{background:var(--bg);color:#fff;min-height:100vh;padding-bottom:90px}
-.header{position:sticky;top:0;z-index:10;background:rgba(8,8,8,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:900;font-size:18px;letter-spacing:-0.5px} .logo span{color:var(--green)}
-.badge{font-size:10px;background:var(--green);color:#000;padding:4px 8px;border-radius:20px;font-weight:800}
-.tabs{display:flex;gap:8px;padding:12px 16px}
-.tab{flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:#888;font-weight:700;text-align:center}
-.tab.active{background:#fff;color:#000;border-color:#fff}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin:12px 16px}
-.btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px}
-.btn-green{background:var(--green);color:#000} .btn-blue{background:var(--blue);color:#fff} .btn-dark{background:#1e1e1e;color:#888;border:1px solid var(--border)}
-input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #2a2a2a;background:#0f0f0f;color:#fff;margin:6px 0;font-size:14px}
-label{font-size:11px;color:#666;font-weight:700;margin-top:8px;display:block;letter-spacing:0.5px}
-#reader{border-radius:12px;overflow:hidden;margin-top:8px}
-.item{display:flex;justify-content:space-between;align-items:center;background:#0f0f0f;border:1px solid #1e1e1e;border-radius:12px;padding:12px;margin:8px 0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
-.small{font-size:11px;color:#666}
-.camera-box{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:12px;overflow:hidden;margin-top:8px}
-.camera-box video{width:100%;height:100%;object-fit:cover}
-canvas{display:none}
+:root{--bg:#080808;--card:#121212;--accent:#00e676;--text:#fff;--muted:#888}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:system-ui, -apple-system, sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #222}
+header h1{font-size:18px} header h1 span{color:var(--accent)}
+.badge{background:var(--accent);color:#000;font-size:10px;padding:6px 10px;border-radius:20px;font-weight:800}
+.tabs{display:flex;gap:10px;padding:16px}
+.tab{flex:1;padding:14px;border-radius:16px;border:1px solid #222;background:var(--card);color:var(--muted);font-weight:700;text-align:center;cursor:pointer}
+.tab.active{background:#e0e0e0;color:#000}
+.card{margin:0 16px 16px;background:var(--card);border-radius:20px;padding:16px;border:1px solid #1e1e1e}
+.loc{font-size:12px;color:var(--muted)} 
+.loc.ok{color:var(--accent);margin-top:6px;font-size:13px;font-weight:600}
+video{width:100%;border-radius:16px;background:#000;aspect-ratio:4/3;object-fit:cover;margin:12px 0}
+input{width:100%;background:#0f0f0f;border:1px solid #222;border-radius:12px;padding:14px;color:#fff;margin:8px 0;outline:none}
+input:focus{border-color:var(--accent)}
+button.main{width:100%;background:var(--accent);color:#000;border:none;border-radius:14px;padding:16px;font-weight:800;font-size:14px;margin-top:10px;cursor:pointer}
+button:disabled{opacity:0.3;cursor:not-allowed}
+.list-item{display:flex;gap:10px;background:#0f0f0f;padding:10px;border-radius:12px;margin-top:8px;font-size:13px;border:1px solid #1a1a1a}
 </style>
 </head>
 <body>
-<div class="header">
-<div class="logo">MDS <span>RIAN</span></div>
-<div class="badge">ONLINE • 300 USER READY</div>
-</div>
+<header><h1>MDS <span>RIAN</span></h1><div class="badge">ONLINE • 50M • 300 USER</div></header>
 <div class="tabs">
-<div class="tab active" id="tabAbsen" onclick="switchTab('absen')">🕒 ABSENSI</div>
-<div class="tab" id="tabStock" onclick="switchTab('stock')">📦 STOCK</div>
+  <div class="tab active" id="tAbsen" onclick="switchTab('absen')">🕒 ABSENSI</div>
+  <div class="tab" id="tStok" onclick="switchTab('stok')">📦 STOK</div>
 </div>
-<div id="viewAbsen">
-<div class="card">
-<div class="small"><span class="dot"></span>LOKASI: SERANG (-6.117, 106.182) Radius 300m</div>
-<div id="gpsStatus" class="small" style="margin-top:6px">Mengecek GPS...</div>
-<div class="camera-box"><video id="video" autoplay playsinline></video><canvas id="canvas"></canvas></div>
-<input id="namaKaryawan" placeholder="Nama: Rian" value="Rian">
-<button class="btn btn-green" onclick="absen()">📸 ABSEN SEKARANG + FOTO</button>
-<div id="absenLog" style="margin-top:12px"></div>
+
+<div id="tab-absen" class="card">
+  <div id="locText" class="loc">📍 LOKASI: SERANG (-6.117, 106.182) Radius 50m - Mencari...</div>
+  <div id="locOk" class="loc ok"></div>
+  <video id="cam" autoplay playsinline muted></video>
+  <canvas id="canvas" style="display:none"></canvas>
+  <input id="nama" placeholder="Nama Karyawan" value="Rian">
+  <button id="btnAbsen" class="main" onclick="absen()">📸 ABSEN SEKARANG + FOTO</button>
+  <div id="absenList" style="margin-top:12px"></div>
 </div>
+
+<div id="tab-stok" class="card" style="display:none">
+  <h3 style="margin-bottom:8px">Scan Stock Opname</h3>
+  <div id="reader" style="margin:10px 0"></div>
+  <input id="itemName" placeholder="Nama Barang / Scan Barcode">
+  <input id="itemQty" type="number" placeholder="Qty">
+  <button class="main" onclick="tambahStok()">TAMBAH STOK</button>
+  <div id="stokList" style="margin-top:12px"></div>
 </div>
-<div id="viewStock" style="display:none">
-<div class="card">
-<h4 style="font-size:14px">SCAN BARCODE STOCK</h4>
-<div id="reader"></div>
-<button class="btn btn-green" onclick="startScan()">📷 MULAI SCAN BARCODE</button>
-<button class="btn btn-dark" id="stopBtn" style="display:none" onclick="stopScan()">STOP SCAN</button>
-<label>BARCODE</label>
-<input id="barcode" placeholder="Auto dari scan">
-<label>NAMA BARANG</label>
-<input id="namaBarang" placeholder="Contoh: AQUA 600ML">
-<label>QTY FISIK</label>
-<input id="qty" type="number" placeholder="0">
-<button class="btn btn-green" onclick="simpanStock()">💾 SIMPAN STOCK</button>
-</div>
-<div class="card">
-<div style="display:flex;justify-content:space-between"><h4>Rekap Hari Ini</h4><span id="stockCount" style="font-weight:800;color:var(--green)">0</span></div>
-<button class="btn btn-blue" onclick="exportAll()">📥 DOWNLOAD EXCEL (ABSEN+STOCK) BUAT BOS</button>
-<div id="stockList"></div>
-<button class="btn btn-dark" onclick="clearAll()">Hapus Data Lokal</button>
-</div>
-</div>
+
 <script>
-const TARGET_LAT=-6.117088; const TARGET_LNG=106.182; const RADIUS_M=1000;
-let absenData=JSON.parse(localStorage.getItem('mdsrian_absen')||'[]');
-let stockData=JSON.parse(localStorage.getItem('mdsrian_stock')||'[]');
-let html5Qr=null; let stream=null;
-function switchTab(t){
- document.getElementById('tabAbsen').classList.toggle('active', t==='absen');
- document.getElementById('tabStock').classList.toggle('active', t==='stock');
- document.getElementById('viewAbsen').style.display = t==='absen'?'block':'none';
- document.getElementById('viewStock').style.display = t==='stock'?'block':'none';
- if(t==='absen') initCamera();
+// === SETTING LOKASI SERANG - 50 METER ===
+const MALL_LAT = -6.117;
+const MALL_LNG = 106.182;
+const MALL_RADIUS = 50; // INI YANG BIKIN 50M LUR, BUKAN 130M LAGI!
+
+let userLat=0,userLng=0,inRange=false;
+
+function haversine(lat1,lon1,lat2,lon2){
+ const R=6371e3; const toRad=x=>x*Math.PI/180;
+ const dLat=toRad(lat2-lat1); const dLon=toRad(lon2-lon1);
+ const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-async function initCamera(){
- try{ stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
- document.getElementById('video').srcObject=stream; }catch(e){ document.getElementById('gpsStatus').innerText='Kamera perlu izin'; }
- checkGPS();
+
+function updateLocation(pos){
+ userLat=pos.coords.latitude; userLng=pos.coords.longitude;
+ const d=haversine(MALL_LAT,MALL_LNG,userLat,userLng);
+ const locText=document.getElementById('locText');
+ const locOk=document.getElementById('locOk');
+ locText.textContent=`LOKASI: SERANG (${MALL_LAT}, ${MALL_LNG}) Radius ${MALL_RADIUS}m`;
+ if(d<=MALL_RADIUS){
+   inRange=true;
+   locOk.textContent=`✅ Jarak ${Math.round(d)}m dari mall - Bisa absen`;
+   document.getElementById('btnAbsen').disabled=false;
+ }else{
+   inRange=false;
+   locOk.textContent=`❌ Jarak ${Math.round(d)}m dari mall - Terlalu jauh (Maks ${MALL_RADIUS}m)`;
+   document.getElementById('btnAbsen').disabled=true;
+ }
 }
-function checkGPS(){
- if(!navigator.geolocation){ document.getElementById('gpsStatus').innerText='GPS tidak support'; return; }
- navigator.geolocation.getCurrentPosition(pos=>{
-  let d=distance(pos.coords.latitude,pos.coords.longitude,TARGET_LAT,TARGET_LNG);
-  let ok=d<=RADIUS_M;
-  document.getElementById('gpsStatus').innerHTML=(ok?'✅':'❌')+` Jarak ${Math.round(d)}m dari mall - ${ok?'Bisa absen':'Di luar area'}`;
-  document.getElementById('gpsStatus').style.color=ok?'#00e676':'#ff5252';
- }, err=>{ document.getElementById('gpsStatus').innerText='Aktifkan GPS'; });
+function locError(){
+  document.getElementById('locText').textContent=`LOKASI: SERANG - Aktifkan GPS HP`;
 }
-function distance(lat1,lon1,lat2,lon2){ let R=6371e3; let a1=lat1*Math.PI/180,a2=lat2*Math.PI/180; let d1=(lat2-lat1)*Math.PI/180,d2=(lon2-lon1)*Math.PI/180; let a=Math.sin(d1/2)**2+Math.cos(a1)*Math.cos(a2)*Math.sin(d2/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(updateLocation,locError,{enableHighAccuracy:true, maximumAge:0});
+}
+
+async function initCam(){
+ try{
+   const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false});
+   document.getElementById('cam').srcObject=s;
+ }catch(e){console.log(e)}
+}
+initCam();
+
 function absen(){
- let nama=document.getElementById('namaKaryawan').value||'Rian';
- let video=document.getElementById('video'); let canvas=document.getElementById('canvas');
+ if(!inRange){alert('Terlalu jauh! Kamu di luar '+MALL_RADIUS+'m dari mall!');return}
+ const canvas=document.getElementById('canvas'); 
+ const video=document.getElementById('cam');
+ if(video.videoWidth==0){alert('Kamera belum siap');return}
  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
  canvas.getContext('2d').drawImage(video,0,0);
- let foto=canvas.toDataURL('image/jpeg',0.6);
- let now=new Date();
- navigator.geolocation.getCurrentPosition(pos=>{
-  let d=distance(pos.coords.latitude,pos.coords.longitude,TARGET_LAT,TARGET_LNG);
-  if(d>RADIUS_M) return alert('❌ Di luar area mall Serang! Jarak '+Math.round(d)+'m');
-  absenData.unshift({nama:nama,waktu:now.toLocaleString('id-ID'),lat:pos.coords.latitude,lng:pos.coords.longitude,foto:foto,jarak:Math.round(d)});
-  localStorage.setItem('mdsrian_absen',JSON.stringify(absenData));
-  renderAbsen(); alert('✅ Absen berhasil!');
- },()=>alert('Aktifkan GPS dulu'));
+ const foto=canvas.toDataURL('image/jpeg',0.6);
+ const nama=document.getElementById('nama').value||'Rian';
+ const data={nama,tgl:new Date().toLocaleString('id-ID'),lat:userLat,lng:userLng,foto, jarak: Math.round(haversine(MALL_LAT,MALL_LNG,userLat,userLng))};
+ const list=JSON.parse(localStorage.getItem('absen')||'[]'); 
+ list.unshift(data);
+ localStorage.setItem('absen',JSON.stringify(list)); 
+ renderAbsen();
+ alert('✅ Absen Berhasil! Jarak '+data.jarak+'m');
 }
 function renderAbsen(){
- document.getElementById('absenLog').innerHTML=absenData.slice(0,5).map(a=>`<div class=item><div><b>${a.nama}</b><br><span class=small>${a.waktu} • ${a.jarak}m</span></div><span style=color:var(--green)>✔</span></div>`).join('')||'<div class=small>Belum absen hari ini</div>';
+ const list=JSON.parse(localStorage.getItem('absen')||'[]');
+ document.getElementById('absenList').innerHTML=list.map(x=>`<div class="list-item"><img src="${x.foto}" style="width:52px;height:52px;border-radius:10px;object-fit:cover"><div><b>${x.nama}</b> - ${x.jarak}m<br><small>${x.tgl}</small></div></div>`).join('');
 }
-function startScan(){
- html5Qr=new Html5Qrcode("reader");
- html5Qr.start({facingMode:"environment"},{fps:10,qrbox:250},dec=>{
-  document.getElementById('barcode').value=dec;
-  try{let c=new AudioContext();let o=c.createOscillator();o.connect(c.destination);o.frequency.value=800;o.start();setTimeout(()=>o.stop(),120)}catch(e){}
-  stopScan(); document.getElementById('namaBarang').focus();
- },()=>{}).catch(e=>alert(e));
- document.getElementById('stopBtn').style.display='block';
+renderAbsen();
+
+let scanner=null;
+function switchTab(t){
+ document.getElementById('tab-absen').style.display=t==='absen'?'block':'none';
+ document.getElementById('tab-stok').style.display=t==='stok'?'block':'none';
+ document.getElementById('tAbsen').classList.toggle('active',t==='absen');
+ document.getElementById('tStok').classList.toggle('active',t==='stok');
+ if(t==='stok' && !scanner){
+   scanner=new Html5Qrcode('reader');
+   scanner.start({facingMode:'environment'},{fps:10,qrbox:250},(txt)=>{document.getElementById('itemName').value=txt;}).catch(()=>{});
+ }
 }
-function stopScan(){ if(html5Qr)html5Qr.stop(); document.getElementById('stopBtn').style.display='none'; }
-function simpanStock(){
- let b=document.getElementById('barcode').value.trim();
- let n=document.getElementById('namaBarang').value.trim();
- let q=document.getElementById('qty').value;
- if(!b||!q) return alert('Barcode & Qty wajib!');
- let now=new Date();
- stockData.unshift({barcode:b,nama:n||b,qty:q,time:now.toLocaleString('id-ID')});
- localStorage.setItem('mdsrian_stock',JSON.stringify(stockData));
- document.getElementById('barcode').value=''; document.getElementById('namaBarang').value=''; document.getElementById('qty').value='';
- renderStock(); startScan();
+
+function tambahStok(){
+ const nama=document.getElementById('itemName').value; 
+ const qty=document.getElementById('itemQty').value||1;
+ if(!nama){alert('Isi nama barang');return}
+ const list=JSON.parse(localStorage.getItem('stok')||'[]'); 
+ list.unshift({nama,qty,tgl:new Date().toLocaleString('id-ID')});
+ localStorage.setItem('stok',JSON.stringify(list)); 
+ renderStok();
+ document.getElementById('itemName').value='';
+ document.getElementById('itemQty').value='';
 }
-function renderStock(){
- document.getElementById('stockCount').innerText=stockData.length;
- document.getElementById('stockList').innerHTML=stockData.map((s,i)=>`<div class=item><div><b>${s.barcode}</b><br><span class=small>${s.nama} • Qty:${s.qty}</span></div><div onclick="stockData.splice(${i},1);localStorage.setItem('mdsrian_stock',JSON.stringify(stockData));renderStock()" style=color:var(--red)>❌</div></div>`).join('')||'<div class=small style=text-align:center;padding:12px>Belum ada scan</div>';
+function renderStok(){
+ const list=JSON.parse(localStorage.getItem('stok')||'[]');
+ document.getElementById('stokList').innerHTML=list.map(x=>`<div class="list-item"><div><b>${x.nama}</b> x ${x.qty}<br><small>${x.tgl}</small></div></div>`).join('');
 }
-function exportAll(){
- if(!absenData.length&&!stockData.length) return alert('Belum ada data');
- let csv='MDS RIAN - Laporan Gabungan\n\nABSENSI\nNama,Waktu,Jarak\n'+absenData.map(a=>`${a.nama},${a.waktu},${a.jarak}m`).join('\n')+'\n\nSTOCK OPNAME\nBarcode,Nama,Qty,Waktu\n'+stockData.map(s=>`${s.barcode},${s.nama},${s.qty},${s.time}`).join('\n');
- let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='MDS-Rian-'+new Date().toLocaleDateString('id-ID')+'.csv'; a.click();
+renderStok();
+
+// Bikin bisa di-INSTAL
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW OK')).catch(()=>{});
 }
-function clearAll(){ if(confirm('Hapus semua data lokal?')){ absenData=[]; stockData=[]; localStorage.removeItem('mdsrian_absen'); localStorage.removeItem('mdsrian_stock'); renderAbsen(); renderStock(); } }
-renderAbsen(); renderStock(); initCamera();
 </script>
 </body>
 </html>
